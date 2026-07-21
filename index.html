@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraMeal // Autonomous Meal Planning Agent</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="brand">
+                <span class="logo-icon">✦</span>
+                <h1>AURA<span>MEAL</span></h1>
+                <span class="tagline">Autonomous Meal Intelligence</span>
+            </div>
+            
+            <div class="header-actions">
+                <div class="agent-status-card">
+                    <span class="pulse-indicator"></span>
+                    <span class="status-text">AGENT // ONLINE</span>
+                </div>
+                <button id="view-shopping-list-btn" class="btn btn-primary">
+                    <span class="btn-icon">🛒</span> View Shopping List
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="app-workspace">
+            
+            <!-- Left Panel: Profile & Pantry -->
+            <section class="panel left-panel">
+                <!-- Diet Profile Card -->
+                <div class="card glass-card profile-card">
+                    <div class="card-header">
+                        <h2>Dietary Profile</h2>
+                        <span class="card-subtitle">Personalize parameters</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-group">
+                            <label for="diet-type">Diet Preference</label>
+                            <select id="diet-type" class="custom-select">
+                                <option value="balanced">Balanced / Anything</option>
+                                <option value="keto">Keto (High Fat, Low Carb)</option>
+                                <option value="vegan">Vegan (Plant-Based)</option>
+                                <option value="vegetarian">Vegetarian</option>
+                                <option value="mediterranean">Mediterranean</option>
+                                <option value="paleo">Paleo</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="slider-header">
+                                <label for="calorie-target">Daily Calories</label>
+                                <span id="calorie-val">2,000 kcal</span>
+                            </div>
+                            <input type="range" id="calorie-target" min="1200" max="4000" step="50" value="2000" class="custom-slider">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Allergies / Avoidances</label>
+                            <div class="allergy-tags-container">
+                                <button type="button" class="tag-checkbox" data-allergy="nuts">Nuts</button>
+                                <button type="button" class="tag-checkbox" data-allergy="gluten">Gluten</button>
+                                <button type="button" class="tag-checkbox" data-allergy="dairy">Dairy</button>
+                                <button type="button" class="tag-checkbox" data-allergy="soy">Soy</button>
+                                <button type="button" class="tag-checkbox" data-allergy="shellfish">Shellfish</button>
+                            </div>
+                        </div>
+
+                        <button id="apply-profile-btn" class="btn btn-outline btn-block">
+                            Update & Regenerate Plan
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Pantry / Fridge Inventory -->
+                <div class="card glass-card pantry-card">
+                    <div class="card-header">
+                        <h2>My Pantry</h2>
+                        <span class="card-subtitle">What's in your fridge?</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="pantry-input-group">
+                            <input type="text" id="pantry-item-input" placeholder="Add egg, spinach, chicken..." class="custom-input">
+                            <button id="add-pantry-btn" class="btn btn-secondary">+</button>
+                        </div>
+                        <div id="pantry-list" class="pantry-list">
+                            <!-- Items dynamically added here -->
+                        </div>
+                        <button id="plan-with-pantry-btn" class="btn btn-accent btn-block">
+                            ✦ Cook from Pantry
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Middle Panel: Meal Plan Grid -->
+            <section class="panel middle-panel meal-plan-section">
+                <div class="meal-plan-header">
+                    <div class="view-toggle">
+                        <button id="weekly-view-btn" class="toggle-btn active">Weekly Planner</button>
+                        <button id="daily-view-btn" class="toggle-btn">Daily Details</button>
+                    </div>
+                    <div id="plan-macro-summary" class="plan-macro-summary">
+                        <!-- Summary metrics -->
+                    </div>
+                </div>
+
+                <!-- Weekly Grid Container -->
+                <div id="weekly-grid" class="weekly-grid">
+                    <!-- 7 columns (Days) will be rendered here dynamically -->
+                </div>
+
+                <!-- Daily View Container (Hidden by default) -->
+                <div id="daily-container" class="daily-container hidden">
+                    <div class="daily-navigator">
+                        <button id="prev-day-btn" class="nav-arrow">&larr;</button>
+                        <h3 id="current-daily-title">Monday</h3>
+                        <button id="next-day-btn" class="nav-arrow">&rarr;</button>
+                    </div>
+                    <div id="daily-meal-list" class="daily-meal-list">
+                        <!-- 4 meal rows for the active day -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Meal Agent Chat -->
+            <section class="panel right-panel agent-chat-section">
+                <div class="card glass-card agent-card">
+                    <div class="card-header chat-header">
+                        <div class="agent-profile">
+                            <div class="agent-avatar">🤖</div>
+                            <div class="agent-info">
+                                <h3>Aura AI</h3>
+                                <span class="agent-status-label">Meal Planner Agent</span>
+                            </div>
+                        </div>
+                        <button id="clear-chat-btn" class="btn-clear" title="Clear chat">🗑️</button>
+                    </div>
+
+                    <!-- Chat Message Area -->
+                    <div id="chat-messages" class="chat-messages">
+                        <div class="message system-message">
+                            <div class="message-content">
+                                Welcome to <strong>AuraMeal</strong>! I'm your AI Meal Planner Agent. I can design customized, allergen-free recipes, schedule meal prep, adapt plans dynamically, and help you cook with what's in your fridge.
+                                <br><br>
+                                Try one of the quick commands below to get started!
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Thinking Terminal -->
+                    <div id="thinking-terminal" class="thinking-terminal hidden">
+                        <div class="terminal-header">
+                            <span class="terminal-title">🔍 Agent Thinking Process</span>
+                            <span class="terminal-dot"></span>
+                        </div>
+                        <div id="thinking-content" class="terminal-content">
+                            <!-- Streamed thinking logs -->
+                        </div>
+                    </div>
+
+                    <!-- Suggestions Chips -->
+                    <div class="suggestion-chips">
+                        <button class="chip" data-prompt="Generate a 2000 kcal keto plan">Plan Keto (2000 kcal)</button>
+                        <button class="chip" data-prompt="I want a vegan meal plan">Plan Vegan</button>
+                        <button class="chip" data-prompt="Show me my shopping list">Shopping List</button>
+                        <button class="chip" data-prompt="Recommend high protein snacks">High Protein Snacks</button>
+                    </div>
+
+                    <!-- Chat Input Area -->
+                    <div class="chat-input-area">
+                        <textarea id="chat-input" placeholder="Ask Aura to swap meals, cook from pantry, customize diets..." rows="1"></textarea>
+                        <button id="send-chat-btn" class="btn btn-primary btn-round">➔</button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Modal: Recipe Detail -->
+    <div id="recipe-modal" class="modal-overlay hidden">
+        <div class="modal-container glass-card animate-zoom">
+            <button class="modal-close" id="close-recipe-modal">&times;</button>
+            <div id="modal-recipe-content" class="modal-recipe-content">
+                <!-- Recipe detail generated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Shopping List -->
+    <div id="shopping-modal" class="modal-overlay hidden">
+        <div class="modal-container shopping-modal glass-card animate-zoom">
+            <button class="modal-close" id="close-shopping-modal">&times;</button>
+            <div class="shopping-modal-header">
+                <h2>Generated Shopping List</h2>
+                <p>Based on your active 7-day meal plan</p>
+            </div>
+            <div class="shopping-modal-body">
+                <div class="shopping-controls">
+                    <button id="copy-shopping-list" class="btn btn-outline">📋 Copy List</button>
+                    <button id="clear-shopping-checklist" class="btn btn-clear-text">Reset Checkboxes</button>
+                </div>
+                <div id="shopping-categories-container" class="shopping-categories-container">
+                    <!-- Categorized ingredients checklist -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="agent.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
