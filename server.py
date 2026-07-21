@@ -32,8 +32,8 @@ class ChatRequest(BaseModel):
 # API Endpoints
 @app.post("/api/chat")
 async def chat_endpoint(req: ChatRequest):
-    """Processes chat request through the agent engine."""
-    response = orchestrator.invoke(
+    """Processes chat request through the agent engine asynchronously."""
+    response = await orchestrator.invoke_async(
         message=req.message,
         conversation_id=req.conversation_id,
         profile=req.profile

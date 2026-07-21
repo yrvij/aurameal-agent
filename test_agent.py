@@ -91,3 +91,9 @@ def test_parse_slot_from_query():
     slot_none = mock_parse("Hello there, who are you?")
     assert slot_none["day"] is None
     assert slot_none["mealTime"] is None
+
+# 5. Regression Golden Dataset Evaluation Test
+def test_golden_dataset_regression():
+    from evaluate_agent import run_regression_tests
+    # This executes the golden dataset assertions
+    run_regression_tests()

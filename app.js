@@ -565,6 +565,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 await new Promise(r => setTimeout(r, 200));
             }
 
+            // Check for Human-In-The-Loop Confirmation Hook
+            if (response.require_confirmation) {
+                const confirmed = confirm(response.confirmation_message);
+                if (confirmed) {
+                    chatInput.value = "confirm_action: " + command;
+                    handleChatSubmit();
+                    return;
+                } else {
+                    addMessage("agent", "Action cancelled by user.");
+                    thinkingTerminalDiv.classList.add("hidden");
+                    return;
+                }
+            }
+
             // Apply updates depending on action
             if (response.action === "GENERATE_PLAN") {
                 state.activePlan = response.updatedPlan;
