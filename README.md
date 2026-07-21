@@ -1,6 +1,6 @@
-# ✦ AuraMeal // Autonomous Meal Planning Agent
+# ✦ AuraMeal // Production-Grade Meal Planning Agent
 
-AuraMeal is a premium, feature-rich web application that functions as an interactive, autonomous meal planning companion. It features a glowing glassmorphic dark-mode interface with a simulated AI reasoning console.
+AuraMeal is a production-grade, full-stack AI meal planning application implementing the Google Agent rubrics. It features a glowing dark-mode glassmorphic frontend served by a FastAPI Python backend, utilizing a real LLM for reasoning, tool calling, memory management, and semantic search.
 
 ![AuraMeal UI Mockup](./aurameal_web_ui.jpg)
 
@@ -9,66 +9,61 @@ AuraMeal is a premium, feature-rich web application that functions as an interac
 ## 🚀 Key Features
 
 ### 1. 🤖 Aura AI Agent Interface
-- **Interactive Chat**: Natural language interface allowing user actions like:
-  - *"Generate a 1800 calorie keto plan"*
-  - *"Swap Wednesday lunch"*
-  - *"Recommend healthy snacks"*
-  - *"Create a grocery list"*
-- **Agent Thinking Console**: A simulated console terminal displaying internal logic processes step-by-step before finalizing response actions (e.g., parsing intent, checking constraints, matching food items).
-- **Suggestion Chips**: Quick-click cards to run pre-populated agent prompts instantly.
+- **Real LLM Integration**: Uses the official `google-genai` SDK to connect to `gemini-2.5-flash`.
+- **Descriptive Python Tool Specifications**: Defined python tools with type hints and explicit docstrings (e.g. `get_recipes_by_filters`, `get_recipes_by_pantry`, and `search_recipes_semantic`).
+- **Guided Error Handling**: Tools wrapped in try-except clauses returning clean structured JSON error strings back to the LLM.
 
-### 2. 📅 Interactive Weekly / Daily Grid
-- **Multi-View Layout**: Easily toggle between **Weekly Planner** grid and **Daily Details** rows.
-- **Micro-Macro Nutrition Summary**: Live tracker calculated on the fly showing average daily calories and Carbs / Protein / Fat macro splits.
-- **Quick Controls**: Individual meal cards support quick "Swap" shuffling and detailed modal pop-ups.
+### 2. 🧠 Context & Memory
+- **Persona System Instruction**: Detailed persona setup prescribing limits, diets, and formatting guidelines.
+- **Context Bloat Prevention**: Chat history limited to the last 10 messages before LLM model dispatch.
+- **Vector Database Integration**: Uses a custom, dependency-free `RecipeVectorStore` calculating cosine similarity over text embeddings (`text-embedding-004`) for high-fidelity semantic recipe search.
+- **Persistent Conversation Memory**: Writes chat transcripts and metadata to an SQLite backend (`aurameal.db`).
 
-### 3. 🍲 Diet & Allergy Profile
-- **Diet Selector**: Instantly choose balanced, keto, vegan, vegetarian, mediterranean, or paleo modes.
-- **Calorie Limit Slider**: Dynamic daily target input adjusting plan distributions.
-- **Allergy Filter Tags**: Toggle allergen exclusions like Nuts, Gluten, Dairy, Soy, and Shellfish. 
+### 3. ⚙️ Orchestration & Logic
+- **Structured Function Calling**: Declares schemas and routes control flows dynamically using function declarations.
+- **State Swapping Logic**: Automatically extracts target day/meal category details in Python (`targetSlot`) and updates the state.
+- **Guardrails**: System guidelines enforce allergy rules and safety limits.
 
-### 4. 🍎 Smart Pantry Matching
-- **Fridge Inventory**: Input what ingredients you have at hand (e.g., eggs, spinach, tomatoes).
-- **Cook from Pantry**: Let Aura search the recipe database and recommend matching recipes with instructions, ingredients list, and macros.
+### 4. 🔍 Observability & Tracing
+- **Structured JSON Logging**: Custom `JSONFormatter` formatting logs for aggregation pipelines.
+- **Distributed Tracing**: Integrates OpenTelemetry tracers and exporter spans for model calls.
+- **PII Redaction**: Regular expression checks (`redact_pii`) sanitize emails and phone numbers from chat databases.
+- **Execution Log Dashboard**: Exposes `/api/logs` endpoint to view execution details.
 
-### 5. 🛒 Categorized Grocery Checklist
-- **Consolidated List**: Compiles ingredients for all planned meals, automatically grouping items into departments (Produce, Proteins, Dairy, Pantry).
-- **Interactive Checkboxes**: Mark off items you already have.
-- **Copy Checklist**: Exports a clean text checklist straight to your clipboard.
-
----
-
-## ⚡ Tech Stack & Architecture
-- **Frontend**: Vanilla HTML5, Custom CSS3 (featuring HSL tailored glow variables and glassmorphism layouts), and Modular ES6 Javascript.
-- **Backend**: Python 3 standard library `http.server` running a multi-threaded service.
-- **State Management**: Persisted in the browser's `localStorage` to retain meal configurations and inventory status upon refreshing.
+### 5. 🛠️ Infrastructure & CI/CD
+- **Automated Test Suite**: Pytest tests in `test_agent.py` validating PII filters, ingredient parsing, and recipe constraints.
+- **Infrastructure as Code (IaC)**: Dockerfile containerization and multi-container Docker Compose.
+- **Secure Secret management**: Dotenv validations prevent starting without key inputs.
 
 ---
 
-## 🛠️ Installation & Setup
+## ⚡ Setup & Local Development
 
 1. **Clone the repository**:
    ```bash
-   git clone git@github.com:cloud-ai-fde/yrvij-ai-in-5-days-assessment.git
-   cd yrvij-ai-in-5-days-assessment
+   git clone git@github.com:yrvij/aurameal-agent.git
+   cd aurameal-agent
    ```
 
-2. **Start the local server**:
+2. **Configure API Key**:
+   Create a `.env` file from the template:
    ```bash
-   python3 server.py
+   cp .env.example .env
+   # Edit .env and enter your GEMINI_API_KEY
    ```
 
-3. **Access the application**:
+3. **Install dependencies and run**:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt  # Or install individual packages: fastapi uvicorn google-genai pytest python-dotenv
+   python server.py
+   ```
+
+4. **Access the application**:
    Open [http://localhost:8080](http://localhost:8080) in your web browser.
 
----
-
-## 📂 Project Structure
-```text
-├── index.html       # Primary HTML skeleton and modal layouts
-├── style.css        # Styling definitions, variables, and responsive grids
-├── app.js           # Main UI state, event listener bindings, and modal renders
-├── agent.js         # Aura Agent NLP rule engine, recipe DB, and thinking simulator
-├── server.py        # Lightweight multi-threaded local web server script
-└── README.md        # Documentation
-```
+5. **Run tests**:
+   ```bash
+   pytest test_agent.py
+   ```
