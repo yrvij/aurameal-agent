@@ -543,24 +543,51 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         try {
-            // Process command through Agent
-            const response = await agent.processCommand(command, state.activePlan, state.profile, logCallback);
+            // Call the backend FastAPI endpoint
+            const res = await fetch("/api/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: command,
+                    conversation_id: "aurameal_convo_1",
+                    profile: state.profile
+                })
+            });
+            if (!res.ok) throw new Error("HTTP error " + res.status);
+            const response = await res.json();
             
+            // Render thinking steps with small delays to look realistic and awesome
+            for (let step of response.thinking) {
+                // Strip the leading "> " for the UI display
+                logCallback(step.replace(/^>\s*/, ""));
+                await new Promise(r => setTimeout(r, 200));
+            }
+
             // Apply updates depending on action
-            if (response.action === "GENERATE_PLAN" || response.action === "UPDATE_PLAN") {
+            if (response.action === "GENERATE_PLAN") {
                 state.activePlan = response.updatedPlan;
-                
-                // If profile variables updated
-                if (response.newProfileSettings) {
-                    state.profile.dietType = response.newProfileSettings.dietType;
-                    state.profile.calorieTarget = response.newProfileSettings.calorieTarget;
-                    syncControls();
-                }
-                
                 saveState();
                 renderWeeklyGrid();
                 renderDailyView();
                 renderMacroSummary();
+            } else if (response.action === "UPDATE_PLAN") {
+                const slot = response.targetSlot;
+                if (slot && slot.day && slot.mealTime && state.activePlan[slot.day]) {
+                    state.activePlan[slot.day][slot.mealTime] = response.updatedPlan;
+                    saveState();
+                    renderWeeklyGrid();
+                    renderDailyView();
+                    renderMacroSummary();
+                } else {
+                    console.warn("Could not determine swap slot, updating Monday dinner as fallback", slot);
+                    state.activePlan["Monday"]["dinner"] = response.updatedPlan;
+                    saveState();
+                    renderWeeklyGrid();
+                    renderDailyView();
+                    renderMacroSummary();
+                }
             } else if (response.action === "SHOW_SHOPPING_LIST") {
                 openShoppingModal();
             }
